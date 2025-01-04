@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.post('/comanda', (req, res) => {
     let comanda = req.body;
-    let query = 'Insert Into comanda(idComanda,idMesero,formaPago,propina,total) value(?,?,?,?,?)'
+    let query = 'Insert Into C(idComanda,idMesero,formaPago,propina,total) value(?,?,?,?,?)'
     connection.query(query, [
         comanda.idComanda,
         comanda.idMesero,
@@ -23,7 +23,7 @@ router.post('/comanda', (req, res) => {
 
 router.put('/comanda', (req, res) => {
     let comanda = req.body;
-    let query = 'update comanda set formaPago = ?, propina = ?, total = ? where idComanda = ?'
+    let query = 'update Comanda set formaPago = ?, propina = ?, total = ? where idComanda = ?'
     connection.query(query, [
         comanda.formaPago,
         comanda.propina,
@@ -41,8 +41,8 @@ router.put('/comanda', (req, res) => {
 
 
 router.post('/comandaId', (req,res) => {
-    let query = `select a.idComanda,concat(b.nombre, ' ', b.apellido) as nombre,a.formaPago,(a.total*a.propina)/(1+a.propina) as propina,a.total from comanda a
-inner join mesero  b on a.idMesero = b.idMesero
+    let query = `select a.idComanda,concat(b.nombre, ' ', b.apellido) as nombre,a.formaPago,(a.total*a.propina)/(1+a.propina) as propina,a.total from Comanda a
+inner join Mesero  b on a.idMesero = b.idMesero
 where a.idcomanda = ?`
     connection.query(query, req.body.idComanda,
         (err, results) => {
@@ -114,7 +114,7 @@ router.get('/paquete', (req, res) => {
 });
 
 router.get('/idComanda', (req, res) => {
-    let query = 'SELECT NEXT VALUE FOR seqcomanda AS Secuencia'
+    let query = 'SELECT NEXT VALUE FOR seqComanda AS Secuencia'
     connection.query(query, null,
         (err, results) => {
             console.log(results);
@@ -134,17 +134,17 @@ router.post('/obtenerTicket', (req, res) => {
     Select SUM(t.subtotal) subtotal FROM (
 	SELECT (Costo * Cantidad) subtotal from Comanda a
     inner join ComandaPlatillos b on a.idComanda = b.idComanda
-    inner join platillos c on c.idPlatillo = b.idPlatillo
+    inner join Platillos c on c.idPlatillo = b.idPlatillo
     WHERE a.idComanda = ?
     union all
-    SELECT (Costo * Cantidad) subtotal from comanda a
+    SELECT (Costo * Cantidad) subtotal from Comanda a
     inner join ComandaBebidas b on a.idComanda = b.idComanda
     inner join Bebidas c on c.idBebida = b.idBebida
     WHERE a.idComanda = ?
     union all
-    SELECT (Costo * Cantidad) subtotal from comanda d
+    SELECT (Costo * Cantidad) subtotal from Comanda d
     inner join ComandaPaquete e on d.idComanda = e.idComanda
-    inner join paquete f on e.idPaquete=f.idPaquete
+    inner join Paquete f on e.idPaquete=f.idPaquete
     WHERE d.idComanda = ?
     ) t`
     connection.query(query, [
@@ -166,16 +166,16 @@ router.post('/obtenerTicket', (req, res) => {
 router.post('/resumenCompra', (req, res) => {
     let obtenerTicket = req.body;
     let query = `
-        SELECT p.nombre as nombre, cp.cantidad as cantidad, p.costo as costo, (cp.cantidad * p.costo) as total  FROM comandaplatillos cp
-        INNER JOIN platillos p on p.idPlatillo = cp.idPlatillo
+        SELECT p.nombre as nombre, cp.cantidad as cantidad, p.costo as costo, (cp.cantidad * p.costo) as total  FROM ComandaPlatillos cp
+        INNER JOIN Platillos p on p.idPlatillo = cp.idPlatillo
         WHERE idComanda = ?
         UNION ALL
-        SELECT b.nombre as nombre, cb.cantidad as cantidad, b.costo as costo, (cb.cantidad * b.costo) as total  FROM comandabebidas cb
-        INNER JOIN bebidas b on b.idBebida = cb.idBebida
+        SELECT b.nombre as nombre, cb.cantidad as cantidad, b.costo as costo, (cb.cantidad * b.costo) as total  FROM ComandaBebidas cb
+        INNER JOIN Bebidas b on b.idBebida = cb.idBebida
         WHERE idComanda = ?
         UNION ALL
-        SELECT pq.nombre as nombre, cpq.cantidad as cantidad, pq.costo as costo, (cpq.cantidad * pq.costo) as total  FROM comandapaquete cpq
-        INNER JOIN paquete pq on pq.idPaquete = cpq.idPaquete
+        SELECT pq.nombre as nombre, cpq.cantidad as cantidad, pq.costo as costo, (cpq.cantidad * pq.costo) as total  FROM ComandaPaquete cpq
+        INNER JOIN Paquete pq on pq.idPaquete = cpq.idPaquete
         WHERE idComanda = ?
     `
     connection.query(query, [
@@ -246,11 +246,11 @@ router.post('/ComandaPaquetes', (req, res) => {
 });
 
 router.get('/productos', (req, res) => {
-    let query = `Select nombre from bebidas
+    let query = `Select nombre from Bebidas
                 union ALL
-                select nombre from platillos
+                select nombre from Platillos
                 union ALL
-                select nombre from paquete`
+                select nombre from Paquete`
     connection.query(query, null,
         (err, results) => {
             if (!err) {
