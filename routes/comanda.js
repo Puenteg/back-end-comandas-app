@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.post('/comanda', (req, res) => {
     let comanda = req.body;
-    let query = 'Insert Into C(idComanda,idMesero,formaPago,propina,total) value(?,?,?,?,?)'
+    let query = 'Insert Into Comanda(idComanda,idMesero,formaPago,propina,total) value(?,?,?,?,?)'
     connection.query(query, [
         comanda.idComanda,
         comanda.idMesero,
